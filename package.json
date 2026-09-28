@@ -1,0 +1,34 @@
+{
+  "name": "lamanhost-db-mcp",
+  "version": "1.0.0",
+  "description": "Official Model Context Protocol (MCP) server for LamanHost Database. Test connection, inspect schema, execute SQL, and get deployment integration guides for AI Agents.",
+  "main": "dist/index.js",
+  "bin": {
+    "lamanhost-db-mcp": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc && chmod +x dist/index.js",
+    "start": "node dist/index.js",
+    "dev": "ts-node src/index.ts",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "lamanhost",
+    "database",
+    "postgres",
+    "vibe-coding",
+    "claude",
+    "cursor"
+  ],
+  "author": "LamanHost",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.6.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "typescript": "^5.3.3"
+  }
+}
