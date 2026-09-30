@@ -64,4 +64,34 @@ export class LamanHostDbClient {
 
     return data;
   }
+
+  public async listProjects(): Promise<any> {
+    if (!this.secretKey) {
+      throw new Error("Kunci rahsia (LAMANHOST_SECRET_KEY) diperlukan.");
+    }
+    const res = await fetch(this.baseUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Database-Secret-Key": this.secretKey,
+      },
+      body: JSON.stringify({ action: "list_projects" }),
+    });
+    return res.json();
+  }
+
+  public async linkProject(projectId: string): Promise<any> {
+    if (!this.secretKey) {
+      throw new Error("Kunci rahsia (LAMANHOST_SECRET_KEY) diperlukan.");
+    }
+    const res = await fetch(this.baseUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Database-Secret-Key": this.secretKey,
+      },
+      body: JSON.stringify({ action: "link_project", projectId }),
+    });
+    return res.json();
+  }
 }

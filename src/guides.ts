@@ -30,6 +30,11 @@ Sebagai AI Agent yang membantu pengguna, fahami prinsip utama ini:
 3. CARA KOD APLIKASI MEMBACA DATABASE:
    Semua kod aplikasi MESTI membaca 'process.env.DATABASE_URL' (atau os.environ.get('DATABASE_URL')).
    Jangan sesekali 'hardcode' password atau URI ke dalam kod repo.
+
+4. PENGURUSAN PORT OLEH PELAYAN (JANGAN MASUKKAN SEBAGAI SECRET):
+   - Port pelayan diuruskan secara automatik oleh platform LamanHost melalui persekitaran kontena.
+   - Pembangun/Agent TIDAK PERLU memasukkan PORT ke dalam Secret atau Environment Variables.
+   - Kod aplikasi hanya perlu membaca pembolehubah lalai: process.env.PORT || 3000.
 ================================================================================
 `.trim();
 }

@@ -136,6 +136,39 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: ["sql"],
         },
       },
+      {
+        name: "db_list_my_projects",
+        description:
+          "Senaraikan semua projek web LamanHost milik pengguna pangkalan data ini sahaja (Tenant-Scoped). Berguna untuk AI menyemak projek sedia ada sebelum pautan dibuat.",
+        inputSchema: {
+          type: "object",
+          properties: {
+            secret_key: {
+              type: "string",
+              description: "Secret key jika ingin override env var.",
+            },
+          },
+        },
+      },
+      {
+        name: "db_link_to_project",
+        description:
+          "Pautkan pangkalan data ini ke projek web LamanHost pengguna secara automatik (menyuntik DATABASE_URL). Hanya projek milik pengguna pangkalan data ini dibenarkan demi keselamatan.",
+        inputSchema: {
+          type: "object",
+          properties: {
+            project_id_or_slug: {
+              type: "string",
+              description: "ID atau slug projek sasaran milik pengguna (contoh: 'presentation' atau 'cmuf6...').",
+            },
+            secret_key: {
+              type: "string",
+              description: "Secret key jika ingin override env var.",
+            },
+          },
+          required: ["project_id_or_slug"],
+        },
+      },
     ],
   };
 });
@@ -372,6 +405,45 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         };
       }
 
+      case "db_list_my_projects": {
+        const res = await client.listProjects();
+        if (!res.success) {
+          return {
+            isError: true,
+            content: [{ type: "text", text: `Gagal menyenaraikan projek: ${res.error}` }],
+          };
+        }
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(res, null, 2),
+            },
+          ],
+        };
+      }
+
+      case "db_link_to_project": {
+        const projectId = (args?.project_id_or_slug || args?.projectId || args?.slug) as string;
+        if (!projectId) {
+          throw new Error("Parameter 'project_id_or_slug' diperlukan.");
+        }
+        const res = await client.linkProject(projectId);
+        if (!res.success) {
+          return {
+            isError: true,
+            content: [{ type: "text", text: `Gagal memautkan pangkalan data ke projek: ${res.error}` }],
+          };
+        }
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(res, null, 2),
+            },
+          ],
+        };
+      }
       default:
         throw new Error(`Tool '${name}' tidak dikenali.`);
     }
