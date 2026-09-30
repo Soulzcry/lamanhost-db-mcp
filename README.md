@@ -72,7 +72,12 @@ On Linux: `~/.config/Claude/claude_desktop_config.json`
 | `db_describe_table` | Inspects schema details of a specific table (column types, nullability, defaults). |
 | `db_get_schema_summary` | Compact full database schema overview (ideal for ORM/migration drafting). |
 | `db_query` | Executes safe SQL queries directly on your database instance. |
-
+| `db_list_my_projects` | Lists user web projects on LamanHost (tenant-scoped). |
+| `db_link_to_project` | Automatically binds database URL to a user's web project. |
+| `db_redeploy_project` | Rebuilds and relaunches a user project container on LamanHost. |
+| `db_list_project_files` | Lists files and folders in a user's project storage (path-safe & tenant-scoped). |
+| `db_read_project_file` | Reads the content of a file in the user's project (e.g. `admin.html`, `config.json`). |
+| `db_update_project_file` | Updates or creates a file in the user's project, with optional automatic live redeploy. |
 ---
 
 ## 💡 How Deployed Apps Connect to LamanHost Database
