@@ -94,4 +94,19 @@ export class LamanHostDbClient {
     });
     return res.json();
   }
+
+  public async redeployProject(projectId: string): Promise<any> {
+    if (!this.secretKey) {
+      throw new Error("Kunci rahsia (LAMANHOST_SECRET_KEY) diperlukan.");
+    }
+    const res = await fetch(this.baseUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Database-Secret-Key": this.secretKey,
+      },
+      body: JSON.stringify({ action: "redeploy_project", projectId }),
+    });
+    return res.json();
+  }
 }
