@@ -78,6 +78,8 @@ On Linux: `~/.config/Claude/claude_desktop_config.json`
 | `db_list_project_files` | Lists files and folders in a user's project storage (path-safe & tenant-scoped). |
 | `db_read_project_file` | Reads the content of a file in the user's project (e.g. `admin.html`, `config.json`). |
 | `db_update_project_file` | Updates or creates a file in the user's project, with optional automatic live redeploy. |
+| `db_get_project_env` | Retrieves project environment variables (Secrets) with 2-way disk/DB sync. |
+| `db_set_project_env` | Updates/sets project Secrets, updates dashboard UI, writes `.env`, and triggers live redeploy. |
 ---
 
 ## 💡 How Deployed Apps Connect to LamanHost Database

@@ -265,6 +265,52 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: ["project_id_or_slug", "file_path", "content"],
         },
       },
+      {
+        name: "db_get_project_env",
+        description:
+          "Dapatkan semua pembolehubah persekitaran (Secrets/Environment Variables) projek pengguna di LamanHost. Menyegerakkan secara langsung dengan fail .env pada storan disk.",
+        inputSchema: {
+          type: "object",
+          properties: {
+            project_id_or_slug: {
+              type: "string",
+              description: "ID atau slug projek sasaran milik pengguna (contoh: 'bahagian' atau 'presentation').",
+            },
+            secret_key: {
+              type: "string",
+              description: "Secret key jika ingin override env var.",
+            },
+          },
+          required: ["project_id_or_slug"],
+        },
+      },
+      {
+        name: "db_set_project_env",
+        description:
+          "Kemas kini atau tambah pembolehubah rahsia (Secrets) ke dalam projek pengguna di LamanHost. Dijamin 2-way sync: dikemas kini dalam senarai Secrets dashboard portal, ditulis ke fail .env disk, dan melancarkan semula kontena aplikasi secara langsung (live redeploy).",
+        inputSchema: {
+          type: "object",
+          properties: {
+            project_id_or_slug: {
+              type: "string",
+              description: "ID atau slug projek sasaran milik pengguna.",
+            },
+            env_vars: {
+              type: "object",
+              description: "Objek pasangan kunci-nilai rahsia untuk ditambah/dikemas kini (contoh: {\"ADMIN_PIN\": \"PPZTurp4\", \"API_KEY\": \"abc\"}).",
+            },
+            redeploy: {
+              type: "boolean",
+              description: "Sama ada ingin melancarkan semula aplikasi secara langsung selepas secret dikemas kini (default: true).",
+            },
+            secret_key: {
+              type: "string",
+              description: "Secret key jika ingin override env var.",
+            },
+          },
+          required: ["project_id_or_slug", "env_vars"],
+        },
+      },
     ],
   };
 });
@@ -631,6 +677,56 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           return {
             isError: true,
             content: [{ type: "text", text: `Gagal mengemas kini fail: ${res.error}` }],
+          };
+        }
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(res, null, 2),
+            },
+          ],
+        };
+      }
+      case "db_get_project_env": {
+        const projectId = (args?.project_id_or_slug || args?.projectId || args?.slug) as string;
+        if (!projectId) {
+          throw new Error("Parameter 'project_id_or_slug' diperlukan.");
+        }
+        const res = await client.getProjectEnv(projectId);
+        if (!res.success) {
+          return {
+            isError: true,
+            content: [{ type: "text", text: `Gagal mendapatkan pembolehubah rahsia projek: ${res.error}` }],
+          };
+        }
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(res, null, 2),
+            },
+          ],
+        };
+      }
+
+      case "db_set_project_env": {
+        const projectId = (args?.project_id_or_slug || args?.projectId || args?.slug) as string;
+        const envVars = (args?.env_vars || args?.envVars) as Record<string, string>;
+        const redeploy = args?.redeploy !== false;
+
+        if (!projectId) {
+          throw new Error("Parameter 'project_id_or_slug' diperlukan.");
+        }
+        if (!envVars || typeof envVars !== "object") {
+          throw new Error("Parameter 'env_vars' (objek key-value) diperlukan.");
+        }
+
+        const res = await client.setProjectEnv(projectId, envVars, redeploy);
+        if (!res.success) {
+          return {
+            isError: true,
+            content: [{ type: "text", text: `Gagal mengemas kini pembolehubah rahsia projek: ${res.error}` }],
           };
         }
         return {

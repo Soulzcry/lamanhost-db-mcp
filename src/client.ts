@@ -165,4 +165,43 @@ export class LamanHostDbClient {
     });
     return res.json();
   }
+
+  public async getProjectEnv(projectId: string): Promise<any> {
+    if (!this.secretKey) {
+      throw new Error("Kunci rahsia (LAMANHOST_SECRET_KEY) diperlukan.");
+    }
+    const res = await fetch(this.baseUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Database-Secret-Key": this.secretKey,
+      },
+      body: JSON.stringify({ action: "get_project_env", projectId }),
+    });
+    return res.json();
+  }
+
+  public async setProjectEnv(
+    projectId: string,
+    envVars: Record<string, string>,
+    redeploy: boolean = true
+  ): Promise<any> {
+    if (!this.secretKey) {
+      throw new Error("Kunci rahsia (LAMANHOST_SECRET_KEY) diperlukan.");
+    }
+    const res = await fetch(this.baseUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Database-Secret-Key": this.secretKey,
+      },
+      body: JSON.stringify({
+        action: "set_project_env",
+        projectId,
+        envVars,
+        redeploy: Boolean(redeploy),
+      }),
+    });
+    return res.json();
+  }
 }
