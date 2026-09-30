@@ -51,6 +51,17 @@ export class LamanHostDbClient {
       throw new Error(`HTTP ${res.status}: Gagal menyambung ke gateway LamanHost.`);
     }
 
+    // Normalisasi struktur result jika gateway memulangkan rows pada aras tertinggi
+    if (data && !data.result && data.rows !== undefined) {
+      data.result = {
+        rows: data.rows,
+        rowCount: data.rowCount ?? data.rows.length,
+        fields: data.fields || [],
+        command: data.command || "SELECT",
+        executionTimeMs: data.executionTimeMs || 0,
+      };
+    }
+
     return data;
   }
 }
