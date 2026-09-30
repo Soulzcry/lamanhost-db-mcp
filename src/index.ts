@@ -722,7 +722,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           throw new Error("Parameter 'env_vars' (objek key-value) diperlukan.");
         }
 
-        const res = await client.setProjectEnv(projectId, envVars, redeploy);
+        const deleteKeys = Array.isArray(args?.delete_keys || args?.deleteKeys)
+          ? ((args?.delete_keys || args?.deleteKeys) as string[])
+          : undefined;
+        const res = await client.setProjectEnv(projectId, envVars, redeploy, deleteKeys);
         if (!res.success) {
           return {
             isError: true,

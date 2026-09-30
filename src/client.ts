@@ -184,7 +184,8 @@ export class LamanHostDbClient {
   public async setProjectEnv(
     projectId: string,
     envVars: Record<string, string>,
-    redeploy: boolean = true
+    redeploy: boolean = true,
+    deleteKeys?: string[]
   ): Promise<any> {
     if (!this.secretKey) {
       throw new Error("Kunci rahsia (LAMANHOST_SECRET_KEY) diperlukan.");
@@ -199,6 +200,7 @@ export class LamanHostDbClient {
         action: "set_project_env",
         projectId,
         envVars,
+        deleteKeys,
         redeploy: Boolean(redeploy),
       }),
     });
