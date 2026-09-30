@@ -188,6 +188,83 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: ["project_id_or_slug"],
         },
       },
+      {
+        name: "db_list_project_files",
+        description:
+          "Senaraikan fail-fail dan folder dalam storan projek LamanHost milik pengguna (Tenant-Scoped & Path-Safe). Membolehkan AI menyemak fail sebelum membaca atau mengemas kini kod projek.",
+        inputSchema: {
+          type: "object",
+          properties: {
+            project_id_or_slug: {
+              type: "string",
+              description: "ID atau slug projek sasaran milik pengguna (contoh: 'bahagian' atau 'presentation').",
+            },
+            path: {
+              type: "string",
+              description: "Sub-laluan folder pilihan jika ingin menyenaraikan folder tertentu sahaja (contoh: 'src' atau 'public').",
+            },
+            secret_key: {
+              type: "string",
+              description: "Secret key jika ingin override env var.",
+            },
+          },
+          required: ["project_id_or_slug"],
+        },
+      },
+      {
+        name: "db_read_project_file",
+        description:
+          "Baca kandungan teks fail daripada projek pengguna di LamanHost (contoh: 'admin.html', 'config.json', 'server.js'). Dilindungi oleh sekatan rentas tenant dan pencegahan penembusan direktori.",
+        inputSchema: {
+          type: "object",
+          properties: {
+            project_id_or_slug: {
+              type: "string",
+              description: "ID atau slug projek sasaran milik pengguna.",
+            },
+            file_path: {
+              type: "string",
+              description: "Laluan fail relatif dari direktori projek (contoh: 'admin.html', 'config.json', 'package.json').",
+            },
+            secret_key: {
+              type: "string",
+              description: "Secret key jika ingin override env var.",
+            },
+          },
+          required: ["project_id_or_slug", "file_path"],
+        },
+      },
+      {
+        name: "db_update_project_file",
+        description:
+          "Kemas kini atau cipta fail dalam storan projek pengguna di LamanHost, dengan pilihan membina dan melancarkan semula kontena secara automatik (auto-redeploy) supaya perubahan dipaparkan secara langsung.",
+        inputSchema: {
+          type: "object",
+          properties: {
+            project_id_or_slug: {
+              type: "string",
+              description: "ID atau slug projek sasaran milik pengguna.",
+            },
+            file_path: {
+              type: "string",
+              description: "Laluan fail relatif untuk disimpan atau dikemas kini (contoh: 'admin.html', 'config.json').",
+            },
+            content: {
+              type: "string",
+              description: "Kandungan fail teks yang lengkap.",
+            },
+            redeploy: {
+              type: "boolean",
+              description: "Tetapkan true jika mahu projek dilancarkan semula secara langsung selepas fail disimpan (default: false).",
+            },
+            secret_key: {
+              type: "string",
+              description: "Secret key jika ingin override env var.",
+            },
+          },
+          required: ["project_id_or_slug", "file_path", "content"],
+        },
+      },
     ],
   };
 });
@@ -473,6 +550,87 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           return {
             isError: true,
             content: [{ type: "text", text: `Gagal melancarkan semula projek: ${res.error}` }],
+          };
+        }
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(res, null, 2),
+            },
+          ],
+        };
+      }
+      case "db_list_project_files": {
+        const projectId = (args?.project_id_or_slug || args?.projectId || args?.slug) as string;
+        if (!projectId) {
+          throw new Error("Parameter 'project_id_or_slug' diperlukan.");
+        }
+        const subPath = (args?.path || args?.subpath) as string | undefined;
+        const res = await client.listProjectFiles(projectId, subPath);
+        if (!res.success) {
+          return {
+            isError: true,
+            content: [{ type: "text", text: `Gagal menyenaraikan fail projek: ${res.error}` }],
+          };
+        }
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(res, null, 2),
+            },
+          ],
+        };
+      }
+
+      case "db_read_project_file": {
+        const projectId = (args?.project_id_or_slug || args?.projectId || args?.slug) as string;
+        const filePath = (args?.file_path || args?.filePath || args?.path) as string;
+        if (!projectId) {
+          throw new Error("Parameter 'project_id_or_slug' diperlukan.");
+        }
+        if (!filePath) {
+          throw new Error("Parameter 'file_path' diperlukan.");
+        }
+        const res = await client.readProjectFile(projectId, filePath);
+        if (!res.success) {
+          return {
+            isError: true,
+            content: [{ type: "text", text: `Gagal membaca fail: ${res.error}` }],
+          };
+        }
+        return {
+          content: [
+            {
+              type: "text",
+              text: typeof res.content === "string" ? res.content : JSON.stringify(res, null, 2),
+            },
+          ],
+        };
+      }
+
+      case "db_update_project_file": {
+        const projectId = (args?.project_id_or_slug || args?.projectId || args?.slug) as string;
+        const filePath = (args?.file_path || args?.filePath || args?.path) as string;
+        const content = args?.content as string;
+        const redeploy = Boolean(args?.redeploy);
+
+        if (!projectId) {
+          throw new Error("Parameter 'project_id_or_slug' diperlukan.");
+        }
+        if (!filePath) {
+          throw new Error("Parameter 'file_path' diperlukan.");
+        }
+        if (typeof content !== "string") {
+          throw new Error("Parameter 'content' diperlukan.");
+        }
+
+        const res = await client.updateProjectFile(projectId, filePath, content, redeploy);
+        if (!res.success) {
+          return {
+            isError: true,
+            content: [{ type: "text", text: `Gagal mengemas kini fail: ${res.error}` }],
           };
         }
         return {

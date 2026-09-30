@@ -109,4 +109,60 @@ export class LamanHostDbClient {
     });
     return res.json();
   }
+
+  public async listProjectFiles(projectId: string, path?: string): Promise<any> {
+    if (!this.secretKey) {
+      throw new Error("Kunci rahsia (LAMANHOST_SECRET_KEY) diperlukan.");
+    }
+    const res = await fetch(this.baseUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Database-Secret-Key": this.secretKey,
+      },
+      body: JSON.stringify({ action: "list_project_files", projectId, path }),
+    });
+    return res.json();
+  }
+
+  public async readProjectFile(projectId: string, filePath: string): Promise<any> {
+    if (!this.secretKey) {
+      throw new Error("Kunci rahsia (LAMANHOST_SECRET_KEY) diperlukan.");
+    }
+    const res = await fetch(this.baseUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Database-Secret-Key": this.secretKey,
+      },
+      body: JSON.stringify({ action: "read_project_file", projectId, filePath }),
+    });
+    return res.json();
+  }
+
+  public async updateProjectFile(
+    projectId: string,
+    filePath: string,
+    content: string,
+    redeploy?: boolean
+  ): Promise<any> {
+    if (!this.secretKey) {
+      throw new Error("Kunci rahsia (LAMANHOST_SECRET_KEY) diperlukan.");
+    }
+    const res = await fetch(this.baseUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Database-Secret-Key": this.secretKey,
+      },
+      body: JSON.stringify({
+        action: "update_project_file",
+        projectId,
+        filePath,
+        content,
+        redeploy: Boolean(redeploy),
+      }),
+    });
+    return res.json();
+  }
 }
